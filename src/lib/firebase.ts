@@ -1,10 +1,8 @@
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
+ import { initializeApp } from "firebase/app";
+ import { getAuth } from "firebase/auth";
+ import { getFirestore } from "firebase/firestore";
 
-// Your web app's Firebase configuration
-const firebaseConfig = {
+ const firebaseConfig = {
   apiKey: "AIzaSyDo46ETDA2drS5GWJNhOsBHuPov6PZnR_8",
   authDomain: "money-tracker-54f24.firebaseapp.com",
   projectId: "money-tracker-54f24",
@@ -15,3 +13,10 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
+
+export const auth = getAuth(app)
+
+
+export const db=getFirestore(app)
+
+export default app
