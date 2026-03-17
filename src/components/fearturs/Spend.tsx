@@ -4,8 +4,7 @@ import { useReviewStore } from "@/store/useReviewStore"
 import { useState } from "react"
 
 const Spend = () => {
-    // const { setSpend, setAmount, setDate } = useReviewStore()
-
+ 
     const [spendValue, setSpendValue] = useState("")
     const [amountValue, setAmountValue] = useState("")
     const [dateValue, setDateValue] = useState("")

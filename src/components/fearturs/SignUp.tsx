@@ -4,6 +4,7 @@ import { createUserWithEmailAndPassword } from "firebase/auth"
 import { setDoc, doc } from "firebase/firestore"
 import { auth, db } from "@/lib/firebase"
 import { useNavigate } from "react-router-dom"
+import { Link } from "react-router-dom"
 
 type FormData = {
   firtsName: string
@@ -112,7 +113,7 @@ const SignUp = () => {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100 px-4">
+    <div className="flex items-center justify-center    px-4">
 
       <form
         onSubmit={handleSubmit}
@@ -177,6 +178,16 @@ const SignUp = () => {
         >
           {loading ? "Creating account..." : "Signup"}
         </button>
+
+          <p className="text-sm text-center mt-4">
+            Already have a account?{" "}
+            <Link
+              to="/login"
+              className="text-blue-500 hover:underline"
+            >
+              Login
+            </Link>
+          </p>
 
       </form>
 

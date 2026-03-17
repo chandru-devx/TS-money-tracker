@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { CgProfile } from "react-icons/cg";
+import { Link } from "react-router-dom";
 
 const navLinks = [
   { href: "#about", label: "About" },
@@ -51,7 +53,13 @@ const Header = () => {
           <Button onClick={handleLogin}>
             Login
           </Button>
+
+          <Link to="/profile">
+            <CgProfile />
+          </Link>
+
         </div>
+
 
         {/* Mobile Menu Button */}
         <button
