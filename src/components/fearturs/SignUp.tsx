@@ -7,21 +7,21 @@ import { useNavigate } from "react-router-dom"
 import { Link } from "react-router-dom"
 
 type FormData = {
-  firtsName: string
+  firtsName : string
   lastName: string
   email: string
   password: string
 }
 
 type FormErrors = {
-  firtsName?: string
+  firtsName ?: string
   lastName?: string
   email?: string
   password?: string
 }
 
 const initialFormData: FormData = {
-  firtsName: "",
+  firtsName : "",
   lastName: "",
   email: "",
   password: ""
@@ -46,7 +46,7 @@ const SignUp = () => {
   const validate = (): FormErrors => {
     const newErrors: FormErrors = {}
 
-    if (!formData.firtsName.trim()) {
+    if (!formData.firtsName .trim()) {
       newErrors.firtsName = "Please fill first name"
     }
 
@@ -92,7 +92,7 @@ const SignUp = () => {
       const user = userCredential.user
 
       await setDoc(doc(db, "users", user.uid), {
-        firtsName: formData.firtsName,
+        firtsName : formData.firtsName ,
         lastName: formData.lastName,
         email: formData.email
       })
@@ -125,14 +125,14 @@ const SignUp = () => {
 
         <input
           type="text"
-          name="firtsName"
+          name="firtsName "
           placeholder="First Name"
-          value={formData.firtsName}
+          value={formData.firtsName }
           onChange={handleChange}
           className="border p-2 w-full rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
         />
         {errors.firtsName && (
-          <p className="text-red-500 text-sm">{errors.firtsName}</p>
+          <p className="text-red-500 text-sm">{errors.firtsName }</p>
         )}
 
         <input
