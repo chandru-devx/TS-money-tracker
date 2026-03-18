@@ -1,8 +1,13 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { CgProfile } from "react-icons/cg";
 import { Link } from "react-router-dom";
+import type { User } from "firebase/auth";
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "@/lib/firebase";
+
+
 
 const navLinks = [
   { href: "#about", label: "About" },
@@ -13,6 +18,21 @@ const navLinks = [
 const Header = () => {
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  // const [loading, setLoading] = useState(true)
+
+  const [userData, setUserData] = useState<User | null>(null)
+
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setUserData(user)
+      // setLoading(false)
+    })
+
+    return () => unsubscribe()
+  }, [])
+
 
   const handleLogin = () => {
     navigate("/login");
@@ -50,13 +70,17 @@ const Header = () => {
             </a>
           ))} */}
 
-          <Button onClick={handleLogin}>
-            Login
-          </Button>
+          {userData && (
+            <Link to="/profile">
+              <CgProfile size={30}/>
+            </Link>
+          )}
 
-          <Link to="/profile">
-            <CgProfile />
-          </Link>
+          {/* {!loading && userData && (
+            <Link to="/profile">
+              <CgProfile />
+            </Link>
+          )} */}
 
         </div>
 
@@ -88,7 +112,7 @@ const Header = () => {
         <div className="md:hidden bg-gray-800 border-t border-gray-700">
           <div className="flex flex-col p-4 space-y-3">
 
-            {navLinks.map((link) => (
+            {/* {navLinks.map((link) => (
               <a
                 key={link.href}
                 href={link.href}
@@ -97,16 +121,16 @@ const Header = () => {
               >
                 {link.label}
               </a>
-            ))}
+            ))} */}
 
-            <Button
-              onClick={() => {
-                handleLogin();
-                setIsMobileMenuOpen(false);
-              }}
-            >
-              Login
-            </Button>
+           {userData && (
+            <Link to="/profile">
+            <div className="flex gap-3.5">
+                <CgProfile size={30}/>
+              <p>Profile</p>
+            </div>
+            </Link>
+          )}
 
           </div>
         </div>

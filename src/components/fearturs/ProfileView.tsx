@@ -7,7 +7,7 @@ import { useNavigate } from "react-router-dom"
 import toast from "react-hot-toast"
 
 type UserData = {
-  firtsName ?: string
+  firtsName?: string
   lastName?: string
   email?: string
 }
@@ -20,22 +20,20 @@ const ProfileView = () => {
   const [isEditing, setIsEditing] = useState(false)
 
   const [formData, setFormData] = useState({
-    firtsName : "",
+    firtsName: "",
     lastName: ""
   })
 
   const isFormValid = () => {
-    if (!formData.firtsName .trim()) return false
+    if (!formData.firtsName.trim()) return false
     if (!formData.lastName.trim()) return false
-    if (formData.firtsName .length < 2) return false
+    if (formData.firtsName.length < 2) return false
     if (formData.lastName.length < 2) return false
 
     return true
   }
 
-  const isChanged =
-    formData.firtsName !== userData?.firtsName ||
-    formData.lastName !== userData?.lastName
+  const isChanged = formData.firtsName !== userData?.firtsName || formData.lastName !== userData?.lastName
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -49,7 +47,7 @@ const ProfileView = () => {
           setUserData(data)
 
           setFormData({
-            firtsName : data.firtsName || "",
+            firtsName: data.firtsName || "",
             lastName: data.lastName || ""
           })
         } else {
@@ -85,7 +83,7 @@ const ProfileView = () => {
     if (!user || !userData) return
 
     // ✅ Validation
-    if (!formData.firtsName .trim()) {
+    if (!formData.firtsName.trim()) {
       toast.error("First name is required")
       return
     }
@@ -95,7 +93,7 @@ const ProfileView = () => {
       return
     }
 
-    if (formData.firtsName .length < 2) {
+    if (formData.firtsName.length < 2) {
       toast.error("First name must be at least 2 characters")
       return
     }
@@ -107,18 +105,16 @@ const ProfileView = () => {
 
     try {
       const docRef = doc(db, "users", user.uid)
-
       await updateDoc(docRef, {
-        firtsName : formData.firtsName ,
+        firtsName: formData.firtsName,
         lastName: formData.lastName
       })
 
       setUserData(prev => ({
         ...prev!,
-        firtsName : formData.firtsName ,
+        firtsName: formData.firtsName,
         lastName: formData.lastName
       }))
-
       setIsEditing(false)
       toast.success("Profile updated successfully")
 
@@ -150,7 +146,7 @@ const ProfileView = () => {
 
           {/* Avatar */}
           <div className="w-20 h-20 rounded-full bg-slate-200 flex items-center justify-center text-2xl font-semibold text-slate-700">
-            {userData.firtsName ?.charAt(0)}
+            {userData.firtsName?.charAt(0)}
           </div>
 
           {/* Name / Edit */}
@@ -159,7 +155,7 @@ const ProfileView = () => {
               <input
                 type="text"
                 name="firtsName "
-                value={formData.firtsName }
+                value={formData.firtsName}
                 onChange={handleChange}
                 className="border p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
                 placeholder="First Name"
@@ -176,7 +172,7 @@ const ProfileView = () => {
             </div>
           ) : (
             <h2 className="text-xl font-semibold mt-4">
-              {userData.firtsName } {userData.lastName}
+              {userData.firtsName} {userData.lastName}
             </h2>
           )}
 
