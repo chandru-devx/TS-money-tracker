@@ -3,6 +3,7 @@ import { Card } from "../ui/card"
 import { onAuthStateChanged, signOut } from "firebase/auth"
 import { getDoc, doc, updateDoc } from "firebase/firestore"
 import { auth, db } from "@/lib/firebase"
+import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage"
 import { useNavigate } from "react-router-dom"
 import toast from "react-hot-toast"
 
@@ -10,12 +11,15 @@ type UserData = {
   firtsName?: string
   lastName?: string
   email?: string
+  photoURL?: string
 }
 
 const ProfileView = () => {
   const navigate = useNavigate()
+  const storage = getStorage()
 
   const [userData, setUserData] = useState<UserData | null>(null)
+  const [imageFile, setImageFile] = useState<File | null>(null)
   const [loading, setLoading] = useState(true)
   const [isEditing, setIsEditing] = useState(false)
 
@@ -24,16 +28,19 @@ const ProfileView = () => {
     lastName: ""
   })
 
+  // ✅ Validation
   const isFormValid = () => {
-    if (!formData.firtsName.trim()) return false
-    if (!formData.lastName.trim()) return false
-    if (formData.firtsName.length < 2) return false
-    if (formData.lastName.length < 2) return false
-
-    return true
+    return (
+      formData.firtsName.trim().length >= 2 &&
+      formData.lastName.trim().length >= 2
+    )
   }
 
-  const isChanged = formData.firtsName !== userData?.firtsName || formData.lastName !== userData?.lastName
+  // ✅ Detect changes (including image)
+  const isChanged =
+    formData.firtsName !== userData?.firtsName ||
+    formData.lastName !== userData?.lastName ||
+    imageFile !== null
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -83,46 +90,55 @@ const ProfileView = () => {
     if (!user || !userData) return
 
     // ✅ Validation
-    if (!formData.firtsName.trim()) {
-      toast.error("First name is required")
-      return
-    }
-
-    if (!formData.lastName.trim()) {
-      toast.error("Last name is required")
-      return
-    }
-
-    if (formData.firtsName.length < 2) {
-      toast.error("First name must be at least 2 characters")
-      return
-    }
-
-    if (formData.lastName.length < 2) {
-      toast.error("Last name must be at least 2 characters")
+    if (!isFormValid()) {
+      toast.error("Please enter valid name")
       return
     }
 
     try {
       const docRef = doc(db, "users", user.uid)
+
+      let imageUrl = userData.photoURL || ""
+
+      // ✅ Upload image
+      if (imageFile) {
+        const storageRef = ref(
+          storage,
+          `users/${user.uid}/${imageFile.name}`
+        )
+
+        await uploadBytes(storageRef, imageFile)
+        imageUrl = await getDownloadURL(storageRef)
+      }
+
+      // ✅ Update Firestore
       await updateDoc(docRef, {
         firtsName: formData.firtsName,
-        lastName: formData.lastName
+        lastName: formData.lastName,
+        photoURL: imageUrl
       })
 
+      // ✅ Update UI
       setUserData(prev => ({
         ...prev!,
         firtsName: formData.firtsName,
-        lastName: formData.lastName
+        lastName: formData.lastName,
+        photoURL: imageUrl
       }))
+
       setIsEditing(false)
+      setImageFile(null)
+
       toast.success("Profile updated successfully")
+      console.log("imageFile:", imageFile)
+      console.log("before upload:", userData?.photoURL)
 
     } catch (error) {
       console.error(error)
       toast.error("Update failed")
     }
   }
+
   if (loading) {
     return (
       <div className="flex justify-center mt-20">
@@ -145,19 +161,43 @@ const ProfileView = () => {
         <div className="p-6 flex flex-col items-center">
 
           {/* Avatar */}
-          <div className="w-20 h-20 rounded-full bg-slate-200 flex items-center justify-center text-2xl font-semibold text-slate-700">
-            {userData.firtsName?.charAt(0)}
-          </div>
+          {imageFile ? (
+            <img
+              src={URL.createObjectURL(imageFile)}
+              className="w-20 h-20 rounded-full object-cover"
+            />
+          ) : userData.photoURL ? (
+            <img
+              src={userData.photoURL}
+              alt="profile"
+              className="w-20 h-20 rounded-full object-cover"
+            />
+          ) : (
+            <div className="w-20 h-20 rounded-full bg-slate-200 flex items-center justify-center text-2xl">
+              {userData.firtsName?.charAt(0)}
+            </div>
+          )}
 
-          {/* Name / Edit */}
+          {/* Edit Mode */}
           {isEditing ? (
             <div className="flex flex-col gap-2 mt-4 w-full">
+
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  if (e.target.files?.[0]) {
+                    setImageFile(e.target.files[0])
+                  }
+                }}
+              />
+
               <input
                 type="text"
-                name="firtsName "
+                name="firtsName"
                 value={formData.firtsName}
                 onChange={handleChange}
-                className="border p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+                className="border p-2 rounded"
                 placeholder="First Name"
               />
 
@@ -166,7 +206,7 @@ const ProfileView = () => {
                 name="lastName"
                 value={formData.lastName}
                 onChange={handleChange}
-                className="border p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+                className="border p-2 rounded"
                 placeholder="Last Name"
               />
             </div>
@@ -178,15 +218,13 @@ const ProfileView = () => {
 
           <p className="text-sm text-gray-500 mt-1">User Profile</p>
 
-          {/* Info */}
-          <div className="w-full mt-6 space-y-3">
-            <div>
-              <p className="text-sm text-gray-500">Email</p>
-              <p className="font-medium">{userData.email}</p>
-            </div>
+          {/* Email */}
+          <div className="w-full mt-6">
+            <p className="text-sm text-gray-500">Email</p>
+            <p className="font-medium">{userData.email}</p>
           </div>
 
-          {/* Actions */}
+          {/* Buttons */}
           <div className="flex gap-3 mt-6 w-full">
 
             {isEditing ? (
@@ -194,15 +232,15 @@ const ProfileView = () => {
                 onClick={handleSave}
                 disabled={!isFormValid() || !isChanged}
                 className="flex-1 py-2 rounded-md bg-green-600 text-white 
-             hover:bg-green-700 transition 
-             disabled:opacity-50 disabled:cursor-not-allowed"
+                hover:bg-green-700 transition 
+                disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Save
               </button>
             ) : (
               <button
                 onClick={() => setIsEditing(true)}
-                className="flex-1 py-2 rounded-md bg-blue-500 text-white hover:bg-blue-600 transition"
+                className="flex-1 py-2 rounded-md bg-blue-500 text-white hover:bg-blue-600"
               >
                 Edit
               </button>
@@ -210,7 +248,7 @@ const ProfileView = () => {
 
             <button
               onClick={handleLogout}
-              className="flex-1 py-2 rounded-md bg-slate-800 text-white hover:bg-slate-900 transition"
+              className="flex-1 py-2 rounded-md bg-slate-800 text-white hover:bg-slate-900"
             >
               Logout
             </button>

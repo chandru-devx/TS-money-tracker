@@ -125,9 +125,9 @@ const SignUp = () => {
 
         <input
           type="text"
-          name="firtsName "
+          name="firtsName"
           placeholder="First Name"
-          value={formData.firtsName }
+          value={formData. firtsName }
           onChange={handleChange}
           className="border p-2 w-full rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
         />

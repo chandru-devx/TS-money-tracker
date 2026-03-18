@@ -1,4 +1,8 @@
 import { useReviewStore } from "@/store/useReviewStore"
+import { FaEdit } from "react-icons/fa";
+import { MdDelete } from "react-icons/md";
+
+
 import {
     Table,
     TableHeader,
@@ -8,13 +12,15 @@ import {
     TableCell,
     TableFooter,
 } from "../ui/table"
+import { useEffect } from "react"
+import { Button } from "../ui/button";
 
 const SpendTable = () => {
-    const { items ,totalAmount} = useReviewStore()
+    const { items, totalAmount, fetchItems, loading } = useReviewStore()
 
-    // const totalAmount = items.reduce((acc, item) => {
-    //     return acc + item.amount
-    // }, 0)
+    useEffect(() => {
+        fetchItems()
+    }, [])
 
     return (
         <Table className="w-[600px]">
@@ -24,18 +30,40 @@ const SpendTable = () => {
                     <TableHead>Date</TableHead>
                     <TableHead>Spend</TableHead>
                     <TableHead>Amount</TableHead>
+                    <TableHead>Action</TableHead>
                 </TableRow>
+
             </TableHeader>
 
             <TableBody>
-                {items.map((item, index) => (
-                    <TableRow key={item.id}>
-                        <TableCell>{index + 1}</TableCell>
-                        <TableCell>{item.date}</TableCell>
-                        <TableCell>{item.spend}</TableCell>
-                        <TableCell>₹ {item.amount}</TableCell>
+                {loading ? (
+                    <TableRow>
+                        <TableCell colSpan={5} className="text-center text-2xl">
+                            Loading...
+                        </TableCell>
                     </TableRow>
-                ))}
+                ) : items.length === 0 ? (
+                    <TableRow>
+                        <TableCell colSpan={5} className="text-center">
+                            No data found
+                        </TableCell>
+                    </TableRow>
+                ) : (
+                    items.map((item, index) => (
+                        <TableRow key={item.id}>
+                            <TableCell>{index + 1}</TableCell>
+                            <TableCell>{item.date}</TableCell>
+                            <TableCell>{item.spend}</TableCell>
+                            <TableCell>₹ {item.amount}</TableCell>
+                            <TableCell>
+                                <div className="flex gap-4">
+                                    <FaEdit size={20} />
+                                    <MdDelete size={20} />
+                                </div>
+                            </TableCell>
+                        </TableRow>
+                    ))
+                )}
             </TableBody>
 
             <TableFooter>
@@ -45,6 +73,9 @@ const SpendTable = () => {
                     </TableCell>
                     <TableCell className="font-bold">
                         ₹ {totalAmount()}
+                    </TableCell>
+                    <TableCell>
+                        <Button>Clear All</Button>
                     </TableCell>
                 </TableRow>
             </TableFooter>

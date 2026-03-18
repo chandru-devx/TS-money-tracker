@@ -34,7 +34,6 @@ const Spend = () => {
         setmessage("")
 
         addItem({
-            id: Date.now(),
             spend: spendValue,
             amount: Number(amountValue),
             date: dateValue,
